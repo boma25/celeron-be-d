@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//enums
+enum ERole {
+  ADMIN
+  USER
+}
+
+enum EAdminType {
+  SUPER_ADMIN
+  ADMIN
+}
+
+enum EOrderStatus {
+  PROCESSING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+enum EMediaType {
+  IMAGE
+  VIDEO
+}
+
+enum ETransactionStatus {
+  PENDING
+  SUCCESSFUL
+  FAILED
+}
+
+model Customer {
+  id           String        @id @unique @default(uuid())
+  firstName    String
+  lastName     String
+  email        String        @unique
+  password     String
+  phoneNumber  BigInt
+  countryCode  String
+  address      Address[]
+  orders       Orders[]
+  transactions Transaction[]
+  cart         Cart?
+  role         ERole         @default(USER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @default(now()) @updatedAt
+}
+
+model Address {
+  id         String   @id @unique @default(uuid())
+  state      String
+  country    String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String
+  orders     Orders[]
+  default    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+}
+
+model Orders {
+  id                   String       @id @unique @default(uuid())
+  orderNumber          String
+  status               EOrderStatus @default(PROCESSING)
+  customer             Customer     @relation(fields: [customerId], references: [id])
+  customerId           String
+  total                Float
+  deliveryAddress      Address      @relation(fields: [addressId], references: [id])
+  addressId            String
+  trnasction           Transaction  @relation(fields: [transactionId], references: [id])
+  transactionId        String       @unique()
+  expectedDeliveryDate DateTime
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @default(now()) @updatedAt
+}
+
+model Transaction {
+  id          String             @id @unique @default(uuid())
+  referenece  String
+  description String
+  order       Orders?
+  status      ETransactionStatus @default(PENDING)
+  customer    Customer           @relation(fields: [customerId], references: [id])
+  customerId  String
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @default(now()) @updatedAt
+}
+
+model Cart {
+  id         String   @id @unique @default(uuid())
+  total      Float
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String   @unique()
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now()) @updatedAt
+}
+
+model Brand {
+  id        String    @id @unique @default(uuid())
+  name      String
+  Products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+}
+
+model ProductCategory {
+  id        String    @id @unique @default(uuid())
+  category  String
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+}
+
+model Product {
+  id         String            @id @unique @default(uuid())
+  brand      Brand             @relation(fields: [barndId], references: [id])
+  barndId    String
+  categories ProductCategory[]
+  medias     ProductMedia[]
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @default(now()) @updatedAt
+}
+
+model ProductMedia {
+  id        String     @id @unique @default(uuid())
+  mediaType EMediaType
+  media_url String
+  product   Product    @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+}
+
+model Admin {
+  id        String     @id @unique @default(uuid())
+  adminType EAdminType @default(ADMIN)
+  role      ERole      @default(ADMIN)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now()) @updatedAt
+}
