@@ -40,49 +40,65 @@ enum ETransactionStatus {
   FAILED
 }
 
-model Customer {
+model User {
   id           String        @id @unique @default(uuid())
   firstName    String
   lastName     String
   email        String        @unique
   password     String
-  phoneNumber  BigInt
-  countryCode  String
+  phoneNumber  String?       @unique
+  countryCode  String?
   address      Address[]
   orders       Orders[]
+  verified     Boolean       @default(false)
   transactions Transaction[]
   cart         Cart?
   role         ERole         @default(USER)
   createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @default(now()) @updatedAt
+  updatedAt    DateTime      @updatedAt
 }
 
 model Address {
-  id         String   @id @unique @default(uuid())
-  state      String
-  country    String
-  customer   Customer @relation(fields: [customerId], references: [id])
-  customerId String
-  orders     Orders[]
-  default    Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  id        String   @id @unique @default(uuid())
+  state     String
+  country   String
+  city      String
+  zip       Int
+  address   String
+  User      User     @relation(fields: [userId], references: [id])
+  userId    String
+  orders    Orders[]
+  default   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderProducts {
+  id        String   @id @unique @default(uuid())
+  total     Float
+  cart      Cart?    @relation(fields: [cartId], references: [id])
+  cartId    String?
+  order     Orders?  @relation(fields: [orderId], references: [id])
+  orderId   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Orders {
-  id                   String       @id @unique @default(uuid())
+  id                   String          @id @unique @default(uuid())
   orderNumber          String
-  status               EOrderStatus @default(PROCESSING)
-  customer             Customer     @relation(fields: [customerId], references: [id])
-  customerId           String
+  status               EOrderStatus    @default(PROCESSING)
+  User                 User            @relation(fields: [userId], references: [id])
+  userId               String
   total                Float
-  deliveryAddress      Address      @relation(fields: [addressId], references: [id])
+  deliveryAddress      Address         @relation(fields: [addressId], references: [id])
   addressId            String
-  trnasction           Transaction  @relation(fields: [transactionId], references: [id])
-  transactionId        String       @unique()
-  expectedDeliveryDate DateTime
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @default(now()) @updatedAt
+  trnasction           Transaction     @relation(fields: [transactionId], references: [id])
+  transactionId        String          @unique()
+  expectedDeliveryDate DateTime?
+  products             OrderProducts[]
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
 }
 
 model Transaction {
@@ -91,19 +107,20 @@ model Transaction {
   description String
   order       Orders?
   status      ETransactionStatus @default(PENDING)
-  customer    Customer           @relation(fields: [customerId], references: [id])
-  customerId  String
+  User        User               @relation(fields: [userId], references: [id])
+  userId      String
   createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @default(now()) @updatedAt
+  updatedAt   DateTime           @updatedAt
 }
 
 model Cart {
-  id         String   @id @unique @default(uuid())
-  total      Float
-  customer   Customer @relation(fields: [customerId], references: [id])
-  customerId String   @unique()
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now()) @updatedAt
+  id        String          @id @unique @default(uuid())
+  total     Float           @default(0)
+  User      User            @relation(fields: [userId], references: [id])
+  userId    String          @unique()
+  products  OrderProducts[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
 }
 
 model Brand {
@@ -111,7 +128,7 @@ model Brand {
   name      String
   Products  Product[]
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  updatedAt DateTime  @updatedAt
 }
 
 model ProductCategory {
@@ -119,7 +136,7 @@ model ProductCategory {
   category  String
   products  Product[]
   createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  updatedAt DateTime  @updatedAt
 }
 
 model Product {
@@ -128,8 +145,13 @@ model Product {
   barndId    String
   categories ProductCategory[]
   medias     ProductMedia[]
+  name       String            @unique
+  colors     Json
+  sizes      Json
+  quantity   Int
+  price      Float
   createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @default(now()) @updatedAt
+  updatedAt  DateTime          @updatedAt
 }
 
 model ProductMedia {
@@ -139,13 +161,17 @@ model ProductMedia {
   product   Product    @relation(fields: [productId], references: [id])
   productId String
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now()) @updatedAt
+  updatedAt DateTime   @updatedAt
 }
 
 model Admin {
   id        String     @id @unique @default(uuid())
   adminType EAdminType @default(ADMIN)
   role      ERole      @default(ADMIN)
+  email     String     @unique
+  password  String
+  firstName String
+  lastName  String
   createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now()) @updatedAt
+  updatedAt DateTime   @updatedAt
 }

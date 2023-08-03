@@ -8,7 +8,10 @@ import {
   registerDecorator,
 } from 'class-validator';
 
-const Match = (property: string, validationOptions?: ValidationOptions) => {
+export const Match = (
+  property: string,
+  validationOptions?: ValidationOptions,
+) => {
   //eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (object: any, propertyName: string) => {
     registerDecorator({
@@ -36,7 +39,10 @@ class MatchConstraint implements ValidatorConstraintInterface {
   }
 }
 
-const NotMatch = (property: string, validationOptions?: ValidationOptions) => {
+export const NotMatch = (
+  property: string,
+  validationOptions?: ValidationOptions,
+) => {
   //eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (object: any, propertyName: string) => {
     registerDecorator({
@@ -64,7 +70,7 @@ class NotMatchConstraint implements ValidatorConstraintInterface {
   }
 }
 
-const IsOtp = (length = 4, validationOptions?: ValidationOptions) => {
+export const IsOtp = (length = 6, validationOptions?: ValidationOptions) => {
   //eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (object: any, propertyName: string) => {
     registerDecorator({
@@ -93,4 +99,37 @@ class IsOtpConstraint implements ValidatorConstraintInterface {
   }
 }
 
-export { Match, MatchConstraint, IsOtp, IsOtpConstraint, NotMatch };
+export const OneOfOptionalRequired = (
+  property: string,
+  validationOptions?: ValidationOptions,
+) => {
+  return (object: any, propertyName: string) => {
+    registerDecorator({
+      target: object.constructor,
+      propertyName,
+      options: validationOptions,
+      constraints: [property],
+      validator: OneOfOptionalRequiredConstraint,
+    });
+  };
+};
+
+@ValidatorConstraint({ name: 'OneOfOptionalRequired' })
+export class OneOfOptionalRequiredConstraint
+  implements ValidatorConstraintInterface
+{
+  validate(value: any, args: ValidationArguments) {
+    const [relatedPropertyName] = args.constraints;
+    const relatedValue = (args.object as any)[relatedPropertyName];
+    return (!!value && typeof value === 'string') || !!relatedValue;
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    const [relatedPropertyName] = args.constraints;
+
+    if (args?.value && typeof args?.value !== 'string')
+      return `${args.property} must be a string`;
+
+    return `either ${relatedPropertyName} or ${args.property} is required`;
+  }
+}

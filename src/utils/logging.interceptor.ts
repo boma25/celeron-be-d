@@ -3,18 +3,19 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Logger,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
+  logger = new Logger('REQUEST');
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    console.log('Before...');
-
     const now = Date.now();
+    const { path } = context.switchToHttp().getRequest().route;
     return next
       .handle()
-      .pipe(tap(() => console.log(`After... ${Date.now() - now}ms`)));
+      .pipe(tap(() => this.logger.log(`${path} ${Date.now() - now}ms`)));
   }
 }

@@ -1,19 +1,11 @@
 import { hash, compare } from 'bcrypt';
+import { User } from '@prisma/client';
+import { TSerializedUser } from 'src/@types/app.types';
 
-import { JwtService } from '@nestjs/jwt';
-import { TSerializedUser, TUser } from 'src/@types/app.types';
-
-const jwt = new JwtService();
-
-const generateToken = async (user: TUser): Promise<string> => {
-  // return await jwt.signAsync({ id: user.id, email: user.email });
-  return;
-};
-
-const serializeUser = (user: TUser): TSerializedUser => {
+const serializeUser = (user: User): TSerializedUser => {
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const { password, ...serializedUser } = user;
-  return {};
+  const { password, ...serializedUser } = user;
+  return serializedUser;
 };
 
 const hashPassword = async (password: string): Promise<string> => {
@@ -35,7 +27,7 @@ const generateAdminPassword = async (): Promise<{
   password: string;
   passwordText: string;
 }> => {
-  const passwordText = `admin${generateOtp()}fcsl`;
+  const passwordText = `admin${generateOtp()}celeron`;
   const password = await hashPassword(passwordText);
   return { password, passwordText };
 };
@@ -45,6 +37,5 @@ export const authHelpers = {
   hashPassword,
   verifyPassword,
   generateOtp,
-  generateToken,
   generateAdminPassword,
 };

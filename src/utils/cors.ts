@@ -1,6 +1,6 @@
 const prodCors = [];
-const devCors = ['http://localhost:5173'];
+const devCors = ['http://localhost:3000', 'http://localhost:3001'];
 
-const AllowedHosts = process.env.NODE_ENV === 'production' ? prodCors : devCors;
+const allowedHosts = process.env.NODE_ENV === 'production' ? prodCors : devCors;
 
-export default AllowedHosts;
+export default allowedHosts;
