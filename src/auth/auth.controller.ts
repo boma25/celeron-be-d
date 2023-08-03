@@ -8,8 +8,10 @@ import { SendOtpDto } from './Dto/sendOtp.dto';
 import { ResetPasswordDto } from './Dto/resetPassword.dto';
 import { VerifyOtpDto } from './Dto/verifyOtp.dto';
 import { GoogleAuthDto } from './Dto/googleAuth.dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @Public()
+@ApiTags('AUTH')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
