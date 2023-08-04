@@ -134,9 +134,21 @@ export class AuthService {
   }
 
   async googleAuth({ token }: GoogleAuthDto): Promise<TLoginResponse> {
-    const infoInfo = await this.oauthClient.getTokenInfo(token);
-    console.log(infoInfo);
-    const user = {} as any;
+    const googleUser = await this.oauthClient.verifyIdToken({
+      idToken: token,
+    });
+    const info = googleUser.getPayload();
+    let user = await this.userService.findUser({ email: info.email });
+
+    if (!user) {
+      user = await this.userService.createUser({
+        email: info.email,
+        lastName: info.family_name,
+        firstName: info.given_name,
+        password: 'password',
+        verified: true,
+      });
+    }
     const payload = {
       email: user.email,
       id: user.id,
