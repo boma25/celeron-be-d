@@ -1,8 +1,8 @@
 import { hash, compare } from 'bcrypt';
-import { User } from '@prisma/client';
+import { Admin, User } from '@prisma/client';
 import { TSerializedUser } from 'src/@types/app.types';
 
-const serializeUser = (user: User): TSerializedUser => {
+const serializeUser = (user: User | Admin): TSerializedUser => {
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password, ...serializedUser } = user;
   return serializedUser;

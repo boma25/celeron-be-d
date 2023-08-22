@@ -15,3 +15,14 @@ export class otpEmailEvent {
     this.otp = otp;
   }
 }
+
+export class newAdminAddedEmailEvent {
+  email: string;
+  firstName: string;
+  password: string;
+  constructor(email: string, firstName: string, password: string) {
+    this.email = email;
+    this.firstName = firstName;
+    this.password = password;
+  }
+}

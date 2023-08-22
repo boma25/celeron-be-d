@@ -9,6 +9,7 @@ import { ResetPasswordDto } from './Dto/resetPassword.dto';
 import { VerifyOtpDto } from './Dto/verifyOtp.dto';
 import { GoogleAuthDto } from './Dto/googleAuth.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { VerifyAccountDto } from './Dto/verifyAccount.dto';
 
 @Public()
 @ApiTags('AUTH')
@@ -19,6 +20,14 @@ export class AuthController {
   @Post('/login')
   async login(@Body() body: LoginDto): Promise<TApiResponse<TLoginResponse>> {
     const data = await this.authService.login(body);
+    return { data, message: 'login successful' };
+  }
+
+  @Post('/login-admin')
+  async adminLogin(
+    @Body() body: LoginDto,
+  ): Promise<TApiResponse<TLoginResponse>> {
+    const data = await this.authService.adminLogin(body);
     return { data, message: 'login successful' };
   }
 
@@ -73,7 +82,7 @@ export class AuthController {
 
   @Post('/verify-account')
   async verifyEmailAndPhoneNumber(
-    @Body() body: VerifyOtpDto,
+    @Body() body: VerifyAccountDto,
   ): Promise<TApiResponse> {
     await this.authService.verifyAccount(body);
     return {

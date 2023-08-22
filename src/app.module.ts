@@ -14,6 +14,10 @@ import { UserModule } from './user/user.module';
 import { AdminModule } from './admin/admin.module';
 import { EmailModule } from './email/email.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ProductsModule } from './products/products.module';
+import { CartModule } from './cart/cart.module';
+import { OrdersModule } from './orders/orders.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -24,6 +28,10 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     UserModule,
     AdminModule,
     EmailModule,
+    ProductsModule,
+    CartModule,
+    OrdersModule,
+    BlogModule,
   ],
   controllers: [AppController],
   providers: [

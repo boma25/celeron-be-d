@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { ROLE_KEY } from '../decorators/roles.decorators';
 import { ERole } from 'src/@types/enums';
+import { IS_PUBLIC_KEY } from '../decorators/public.decorators';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -10,14 +11,18 @@ export class RolesGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    const role = this.reflector.getAllAndOverride<boolean>(ROLE_KEY, [
+    const roles = this.reflector.getAllAndOverride<ERole[]>(ROLE_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
     ]);
     const request = context.switchToHttp().getRequest();
 
-    if (!role && request.role === ERole.USER) return true;
+    if ((!roles && request.role === ERole.USER) || isPublic) return true;
 
-    return request.role === role;
+    return roles?.includes(request.role);
   }
 }

@@ -20,12 +20,16 @@ import { VerifyOtpDto } from './Dto/verifyOtp.dto';
 import { GoogleAuthDto } from './Dto/googleAuth.dto';
 import { Auth, google } from 'googleapis';
 import { ConfigService } from '@nestjs/config';
+import { AdminService } from 'src/admin/admin.service';
+import { VerifyAccountDto } from './Dto/verifyAccount.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
   private oauthClient: Auth.OAuth2Client;
   constructor(
     private userService: UserService,
+    private adminService: AdminService,
     private jwtService: JwtService,
     private eventEmitter: EventEmitter2,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -41,8 +45,11 @@ export class AuthService {
     if (!user || !(await authHelpers.verifyPassword(password, user.password))) {
       throw new BadRequestException('invalid credentials');
     }
-    if (!user.verified)
+    if (!user.emailVerified)
       throw new ForbiddenException('kindly verify your email address');
+
+    if (!user.phoneNumberVerified)
+      throw new ForbiddenException('kindly verify your phoneNumber');
 
     const payload = {
       email: user.email,
@@ -53,6 +60,28 @@ export class AuthService {
     return {
       authToken: await this.jwtService.signAsync(payload),
       user: authHelpers.serializeUser(user),
+    };
+  }
+
+  async adminLogin({ email, password }: LoginDto): Promise<TLoginResponse> {
+    const admin = await this.adminService.findAdmin({ email });
+    if (
+      !admin ||
+      !(await authHelpers.verifyPassword(password, admin.password))
+    ) {
+      throw new BadRequestException('invalid credentials');
+    }
+
+    const payload = {
+      email: admin.email,
+      id: admin.id,
+      role: admin.role,
+      adminType: admin.adminType,
+    };
+
+    return {
+      authToken: await this.jwtService.signAsync(payload),
+      user: authHelpers.serializeUser(admin),
     };
   }
 
@@ -118,7 +147,11 @@ export class AuthService {
     await this.cacheManager.set(`${email}-otp`, true, 60 * 1000 * 5);
   }
 
-  async verifyAccount({ email, otp }: VerifyOtpDto): Promise<void> {
+  async verifyAccount({
+    email,
+    phoneNumber,
+    otp,
+  }: VerifyAccountDto): Promise<void> {
     const user = await this.userService.findUser({ email });
     if (!user) throw new BadRequestException('invalid email address');
 
@@ -126,9 +159,13 @@ export class AuthService {
     const otpVerified = await this.cacheManager.get(`${email}-otp`);
     if (otpVerified !== true) throw new BadRequestException('otp not verified');
 
+    const data: Prisma.UserUpdateInput = { emailVerified: true };
+    if (phoneNumber) {
+      data['phoneNumberVerified'] = true;
+    }
     await this.userService.updateUser({
       where: { email },
-      data: { verified: true },
+      data,
     });
     await this.cacheManager.del(`${email}-otp`);
   }
@@ -146,7 +183,7 @@ export class AuthService {
         lastName: info.family_name,
         firstName: info.given_name,
         password: 'password',
-        verified: true,
+        emailVerified: true,
       });
     }
     const payload = {

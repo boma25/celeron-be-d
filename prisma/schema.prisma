@@ -19,6 +19,7 @@ enum ERole {
 enum EAdminType {
   SUPER_ADMIN
   ADMIN
+  VIEWER
 }
 
 enum EOrderStatus {
@@ -40,22 +41,35 @@ enum ETransactionStatus {
   FAILED
 }
 
+enum EVisibilityStatus {
+  ACHIEVED
+  DRAFT
+  LIVE
+}
+
+enum EProductState {
+  ON_SALE
+  COMMING_SOON
+  OUT_OF_STOCK
+}
+
 model User {
-  id           String        @id @unique @default(uuid())
-  firstName    String
-  lastName     String
-  email        String        @unique
-  password     String
-  phoneNumber  String?       @unique
-  countryCode  String?
-  address      Address[]
-  orders       Orders[]
-  verified     Boolean       @default(false)
-  transactions Transaction[]
-  cart         Cart?
-  role         ERole         @default(USER)
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id                  String        @id @unique @default(uuid())
+  firstName           String
+  lastName            String
+  email               String        @unique
+  password            String
+  phoneNumber         String?       @unique
+  countryCode         String?
+  address             Address[]
+  orders              Order[]
+  emailVerified       Boolean       @default(false)
+  phoneNumberVerified Boolean       @default(false)
+  transactions        Transaction[]
+  cart                Cart?
+  role                ERole         @default(USER)
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 }
 
 model Address {
@@ -67,45 +81,50 @@ model Address {
   address   String
   User      User     @relation(fields: [userId], references: [id])
   userId    String
-  orders    Orders[]
+  orders    Order[]
   default   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model OrderProducts {
+model OrderProduct {
   id        String   @id @unique @default(uuid())
-  total     Float
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String   @unique
+  quantity  Int
+  color     String?
+  size      String?
   cart      Cart?    @relation(fields: [cartId], references: [id])
   cartId    String?
-  order     Orders?  @relation(fields: [orderId], references: [id])
+  order     Order?   @relation(fields: [orderId], references: [id])
   orderId   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Orders {
-  id                   String          @id @unique @default(uuid())
+model Order {
+  id                   String         @id @unique @default(uuid())
   orderNumber          String
-  status               EOrderStatus    @default(PROCESSING)
-  User                 User            @relation(fields: [userId], references: [id])
+  status               EOrderStatus   @default(PROCESSING)
+  User                 User           @relation(fields: [userId], references: [id])
   userId               String
   total                Float
-  deliveryAddress      Address         @relation(fields: [addressId], references: [id])
+  deliveryAddress      Address        @relation(fields: [addressId], references: [id])
   addressId            String
-  trnasction           Transaction     @relation(fields: [transactionId], references: [id])
-  transactionId        String          @unique()
+  transction           Transaction    @relation(fields: [transactionId], references: [id])
+  transactionId        String         @unique()
   expectedDeliveryDate DateTime?
-  products             OrderProducts[]
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
+  shippingFee          Int
+  products             OrderProduct[]
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
 }
 
 model Transaction {
   id          String             @id @unique @default(uuid())
   referenece  String
   description String
-  order       Orders?
+  order       Order?
   status      ETransactionStatus @default(PENDING)
   User        User               @relation(fields: [userId], references: [id])
   userId      String
@@ -114,21 +133,33 @@ model Transaction {
 }
 
 model Cart {
-  id        String          @id @unique @default(uuid())
-  total     Float           @default(0)
-  User      User            @relation(fields: [userId], references: [id])
-  userId    String          @unique()
-  products  OrderProducts[]
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id        String         @id @unique @default(uuid())
+  total     Float          @default(0)
+  User      User           @relation(fields: [userId], references: [id])
+  userId    String         @unique()
+  products  OrderProduct[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 }
 
-model Brand {
+model Manufacturer {
   id        String    @id @unique @default(uuid())
   name      String
-  Products  Product[]
+  products  Product[]
+  models    Model[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+}
+
+model Model {
+  id             String       @id @unique @default(uuid())
+  name           String
+  products       Product[]
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  years          Json
+  manufacturerId String       @unique()
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model ProductCategory {
@@ -140,18 +171,26 @@ model ProductCategory {
 }
 
 model Product {
-  id         String            @id @unique @default(uuid())
-  brand      Brand             @relation(fields: [barndId], references: [id])
-  barndId    String
-  categories ProductCategory[]
-  medias     ProductMedia[]
-  name       String            @unique
-  colors     Json
-  sizes      Json
-  quantity   Int
-  price      Float
-  createdAt  DateTime          @default(now())
-  updatedAt  DateTime          @updatedAt
+  id             String            @id @unique @default(uuid())
+  manufacturer   Manufacturer?     @relation(fields: [manufacturerId], references: [id])
+  manufacturerId String?
+  model          Model?            @relation(fields: [modelId], references: [id])
+  modelId        String?
+  categories     ProductCategory[]
+  medias         ProductMedia[]
+  orderProduct   OrderProduct?
+  name           String            @unique
+  colors         Json?
+  sizes          Json?
+  year           String?
+  quantity       Int
+  price          Float
+  configurable   Boolean           @default(false)
+  state          EProductState?
+  status         EVisibilityStatus @default(DRAFT)
+  achieved       Boolean           @default(false)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
 }
 
 model ProductMedia {
@@ -165,13 +204,24 @@ model ProductMedia {
 }
 
 model Admin {
-  id        String     @id @unique @default(uuid())
-  adminType EAdminType @default(ADMIN)
-  role      ERole      @default(ADMIN)
-  email     String     @unique
-  password  String
-  firstName String
-  lastName  String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id         String     @id @unique @default(uuid())
+  adminType  EAdminType @default(ADMIN)
+  role       ERole      @default(ADMIN)
+  email      String     @unique
+  password   String
+  firstName  String
+  lastName   String
+  lastActive DateTime?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Blog {
+  id         String            @id @unique @default(uuid())
+  coverImage String
+  title      String            @unique
+  content    String
+  status     EVisibilityStatus @default(DRAFT)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
 }
