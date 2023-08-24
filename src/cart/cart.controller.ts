@@ -14,6 +14,7 @@ import { IAppRequest, TApiResponse } from 'src/@types/app.types';
 import { Cart } from '@prisma/client';
 import { addToCartDto } from './Dto/addToCart.dto';
 import { UpdateQuantityDto } from './Dto/updateQuantity.dto';
+import { CheckoutDto } from './Dto/checkout.dto';
 
 @ApiTags('CART')
 @Controller('cart')
@@ -57,8 +58,11 @@ export class CartController {
   }
 
   @Post('checkout')
-  async checkout(@Req() req: IAppRequest): TApiResponse<Cart> {
-    await this.cartService.checkout(req['userId']);
+  async checkout(
+    @Req() req: IAppRequest,
+    @Body() body: CheckoutDto,
+  ): TApiResponse<Cart> {
+    await this.cartService.checkout(req['userId'], body);
     return { message: 'checkout successful' };
   }
 }

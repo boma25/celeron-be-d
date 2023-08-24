@@ -4,12 +4,19 @@ import { PrismaService } from 'src/prisma.service';
 import { addToCartDto } from './Dto/addToCart.dto';
 import { ProductsService } from 'src/products/products.service';
 import { UpdateQuantityDto } from './Dto/updateQuantity.dto';
+import { CheckoutDto } from './Dto/checkout.dto';
+import { UserService } from 'src/user/user.service';
+import { addAddressDto } from 'src/user/Dto/addAddress.dto';
+import { validateDto } from 'src/utils/helpers/general.helpers';
+import { OrdersService } from 'src/orders/orders.service';
 
 @Injectable()
 export class CartService {
   constructor(
     private prismaService: PrismaService,
     private productService: ProductsService,
+    private userService: UserService,
+    private orderService: OrdersService,
   ) {}
 
   async getCart(userId: string): Promise<Cart> {
@@ -91,6 +98,12 @@ export class CartService {
     return await this.updateCart(userId, { total });
   }
 
+  async emptyCart(userId: string): Promise<Cart> {
+    const cart = await this.getCart(userId);
+    if (!cart) throw new BadRequestException('invalid user id');
+    return await this.updateCart(userId, { total: 0 });
+  }
+
   async updateCart(
     userId: string,
     data: Prisma.CartUpdateInput,
@@ -102,11 +115,56 @@ export class CartService {
     });
   }
 
-  async checkout(userId: string): Promise<void> {
+  async checkout(userId: string, body: CheckoutDto): Promise<void> {
+    const { addressId, ...newAddressPayload } = body;
+    let address: string = addressId;
+    if (!addressId && !Object.keys(newAddressPayload).length)
+      throw new BadRequestException(
+        'addressId or newAddressPayload is required',
+      );
+
+    //verify addressId is valid
+    if (addressId) {
+      const addressExist = await this.userService.findAddressById(
+        addressId,
+        userId,
+      );
+      address = addressExist.id;
+    }
+    //if no addressId, verify and create new address
+    if (!addressId && newAddressPayload) {
+      const addressObj = new addAddressDto();
+      for (const key of Object.keys(newAddressPayload)) {
+        addressObj[key] = newAddressPayload[key];
+      }
+      await validateDto(addressObj);
+      const newAddress = await this.userService.addAddress(userId, addressObj);
+      address = newAddress.id;
+    }
     const cart = await this.getCart(userId);
     const orderProducts = await this.prismaService.orderProduct.findMany({
       where: { cartId: cart.id },
     });
     if (!orderProducts.length) throw new BadRequestException('cart is empty');
+    const transaction = await this.prismaService.transaction.create({
+      data: {
+        reference: '1234567890',
+        description: 'payment for order',
+        userId,
+      },
+    });
+    const order = await this.orderService.createOrder({
+      total: cart.total,
+      User: { connect: { id: userId } },
+      deliveryAddress: { connect: { id: address } },
+      transaction: { connect: { id: transaction.id } },
+      orderNumber: 1,
+      shippingFee: 5000,
+    });
+    await this.prismaService.orderProduct.updateMany({
+      where: { cartId: cart.id },
+      data: { orderId: order.id, cartId: null },
+    });
+    await this.emptyCart(userId);
   }
 }

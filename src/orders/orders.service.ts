@@ -8,6 +8,13 @@ import { UpdateOrderDto } from './Dto/updateOrder.dto';
 export class OrdersService {
   constructor(private prismaService: PrismaService) {}
 
+  async createOrder(data: Prisma.OrderCreateInput): Promise<Order> {
+    const orderNumber = Math.random() * 1000000;
+    return await this.prismaService.order.create({
+      data: { ...data, orderNumber },
+    });
+  }
+
   async getOrderById(id: string, userId: string, role: ERole): Promise<Order> {
     const where: Prisma.OrderWhereUniqueInput = { id };
     if (role === ERole.USER) {

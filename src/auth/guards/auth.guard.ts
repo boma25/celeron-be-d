@@ -49,9 +49,9 @@ export class AuthGuard implements CanActivate {
 
       let user: TSerializedUser;
       if (payload.role === ERole.ADMIN) {
-        user = await this.adminService.findAdmin({ email: payload.email });
+        user = await this.adminService.findAdmin({ id: payload.id });
       } else if (payload.role === ERole.USER) {
-        user = await this.userService.findUser({ email: payload.email });
+        user = await this.userService.findUser({ id: payload.id });
       }
 
       //TODO => add method to set user
