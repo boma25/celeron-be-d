@@ -1,4 +1,9 @@
-import { EAdminType, EVisibilityStatus, Prisma } from '@prisma/client';
+import {
+  EAdminType,
+  EMediaType,
+  EVisibilityStatus,
+  Prisma,
+} from '@prisma/client';
 
 export const superAdminSeedData: Prisma.AdminCreateInput = {
   email: 'admin@admin.com',
@@ -29,60 +34,68 @@ export const blogsSeedData: Prisma.BlogCreateManyInput[] = [
 export const productsSeedData = [
   {
     name: 'shoe red',
-    colors: ['red'],
+    colors: ['bg-RED_01'],
     sizes: ['M'],
     quantity: 10,
     price: 5000,
     status: EVisibilityStatus.LIVE,
     achieved: false,
+    description:
+      'Now you can enjoy up to 6 hours of listening time on a	single charge, and up to 30 hours of listening time with the	MagSafe Charging Case. Recharge the MagSafe Charging Case	with an Apple Watch or MagSafe charger. You can also use theLightning connector or a Qi-certified charger.',
     medias: [
       {
-        mediaType: 'IMAGE',
+        mediaType: EMediaType.IMAGE,
         media_url: 'https://picsum.photos/200/303',
       },
     ],
   },
   {
     name: 'shoe black',
-    colors: ['red'],
+    colors: ['bg-RED_01'],
     sizes: ['M'],
     quantity: 10,
     price: 5000,
     status: EVisibilityStatus.LIVE,
     achieved: false,
+    description:
+      'Now you can enjoy up to 6 hours of listening time on a	single charge, and up to 30 hours of listening time with the	MagSafe Charging Case. Recharge the MagSafe Charging Case	with an Apple Watch or MagSafe charger. You can also use theLightning connector or a Qi-certified charger.',
     medias: [
       {
-        mediaType: 'IMAGE',
+        mediaType: EMediaType.IMAGE,
         media_url: 'https://picsum.photos/200/304',
       },
     ],
   },
   {
     name: 'shoe pink',
-    colors: ['red'],
+    colors: ['bg-RED_01'],
     sizes: ['M'],
     quantity: 10,
     price: 5000,
     status: EVisibilityStatus.LIVE,
     achieved: false,
+    description:
+      'Now you can enjoy up to 6 hours of listening time on a	single charge, and up to 30 hours of listening time with the	MagSafe Charging Case. Recharge the MagSafe Charging Case	with an Apple Watch or MagSafe charger. You can also use theLightning connector or a Qi-certified charger.',
     medias: [
       {
-        mediaType: 'IMAGE',
+        mediaType: EMediaType.IMAGE,
         media_url: 'https://picsum.photos/200/305',
       },
     ],
   },
   {
     name: 'shoe white',
-    colors: ['red'],
+    colors: ['bg-RED_01'],
     sizes: ['M'],
     quantity: 10,
     price: 5000,
     status: EVisibilityStatus.LIVE,
     achieved: false,
+    description:
+      'Now you can enjoy up to 6 hours of listening time on a	single charge, and up to 30 hours of listening time with the	MagSafe Charging Case. Recharge the MagSafe Charging Case	with an Apple Watch or MagSafe charger. You can also use theLightning connector or a Qi-certified charger.',
     medias: [
       {
-        mediaType: 'IMAGE',
+        mediaType: EMediaType.IMAGE,
         media_url: 'https://picsum.photos/200/306',
       },
     ],

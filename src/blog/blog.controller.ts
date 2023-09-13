@@ -6,11 +6,12 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   Req,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { ApiTags } from '@nestjs/swagger';
-import { IAppRequest, TApiResponse } from 'src/@types/app.types';
+import { IAppRequest, TApiResponse, TQueryParams } from 'src/@types/app.types';
 import { Blog } from '@prisma/client';
 import { Public } from 'src/auth/decorators/public.decorators';
 import { Roles } from 'src/auth/decorators/roles.decorators';
@@ -25,8 +26,11 @@ export class BlogController {
 
   @Get()
   @Public()
-  async getBlogs(@Req() req: IAppRequest): TApiResponse<Blog[]> {
-    const response = await this.blogService.findBlogs(req['role']);
+  async getBlogs(
+    @Req() req: IAppRequest,
+    @Query() query: TQueryParams,
+  ): TApiResponse<Blog[]> {
+    const response = await this.blogService.findBlogs(req['role'], query);
     return {
       ...response,
       message: 'blogs fetched',

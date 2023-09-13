@@ -87,7 +87,6 @@ export class AuthService {
 
   async signUp({ ...data }: SignUpDto): Promise<void> {
     const password = await authHelpers.hashPassword(data.password);
-    delete data.confirmPassword;
     const user = await this.userService.createUser({ ...data, password });
     const { email, firstName } = user;
     this.eventEmitter.emit(
@@ -160,9 +159,9 @@ export class AuthService {
     if (otpVerified !== true) throw new BadRequestException('otp not verified');
 
     const data: Prisma.UserUpdateInput = { emailVerified: true };
-    if (phoneNumber) {
-      data['phoneNumberVerified'] = true;
-    }
+
+    data['phoneNumberVerified'] = phoneNumber === user.phoneNumber;
+
     await this.userService.updateUser({
       where: { email },
       data,
@@ -185,6 +184,8 @@ export class AuthService {
         password: 'password',
         emailVerified: true,
       });
+
+      return;
     }
     const payload = {
       email: user.email,

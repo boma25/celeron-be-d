@@ -133,4 +133,13 @@ export class ProductsService {
       include: { manufacturer: true, medias: true, model: true },
     });
   }
+
+  async findRelatedProducts(id: string): Promise<Product[]> {
+    const product = await this.findProductById(id);
+    return await this.prismaService.product.findMany({
+      where: { status: EVisibilityStatus.LIVE },
+      take: 4,
+      include: { manufacturer: true, medias: true, model: true },
+    });
+  }
 }

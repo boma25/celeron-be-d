@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNumberString, IsOptional } from 'class-validator';
+import { IsEmail, IsNumberString } from 'class-validator';
 import { IsOtp } from 'src/utils/helpers/decorators.helpers';
 
 export class VerifyAccountDto {
@@ -9,7 +9,6 @@ export class VerifyAccountDto {
 
   @ApiProperty()
   @IsNumberString()
-  @IsOptional()
   phoneNumber: string;
 
   @ApiProperty()

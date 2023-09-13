@@ -45,6 +45,7 @@ enum EVisibilityStatus {
   ACHIEVED
   DRAFT
   LIVE
+  SCHEDULED
 }
 
 enum EProductState {
@@ -179,6 +180,7 @@ model Product {
   categories     ProductCategory[]
   medias         ProductMedia[]
   orderProduct   OrderProduct?
+  description    String            @db.VarChar(10000)
   name           String            @unique
   colors         Json?
   sizes          Json?
@@ -220,7 +222,7 @@ model Blog {
   id         String            @id @unique @default(uuid())
   coverImage String
   title      String            @unique
-  content    String
+  content    String            @db.VarChar(10000)
   status     EVisibilityStatus @default(DRAFT)
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt

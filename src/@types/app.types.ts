@@ -1,4 +1,10 @@
-import { Admin, EAdminType, ERole, User } from '@prisma/client';
+import {
+  Admin,
+  EAdminType,
+  ERole,
+  EVisibilityStatus,
+  User,
+} from '@prisma/client';
 import { Request } from 'express';
 
 export type TSerializedUser = Omit<User | Admin, 'password'>;
@@ -28,6 +34,7 @@ export type TQueryParams = {
   limit?: number;
   page?: number;
   search?: string;
+  visibilityStatus?: EVisibilityStatus;
 };
 
 export type TPaginatedResponse<T> = {

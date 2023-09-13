@@ -39,6 +39,12 @@ export class UpdateProductDto {
   name: string;
 
   @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  description: string;
+
+  @ApiProperty()
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

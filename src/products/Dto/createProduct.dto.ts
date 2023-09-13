@@ -38,6 +38,11 @@ export class CreateProductDto {
   name: string;
 
   @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @ApiProperty()
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })

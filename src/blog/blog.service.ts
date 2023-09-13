@@ -3,7 +3,7 @@ import { PrismaService } from 'src/prisma.service';
 import { updateBlogDto } from './Dto/updateBlog.dto';
 import { Blog, ERole, EVisibilityStatus, Prisma } from '@prisma/client';
 import { CreateBlogDto } from './Dto/createBlog.dto';
-import { TServerResponse } from 'src/@types/app.types';
+import { TQueryParams, TServerResponse } from 'src/@types/app.types';
 
 @Injectable()
 export class BlogService {
@@ -21,10 +21,17 @@ export class BlogService {
     return blog;
   }
 
-  async findBlogs(role?: ERole): Promise<TServerResponse<Blog[]>> {
+  async findBlogs(
+    role?: ERole,
+    queryParams?: TQueryParams,
+  ): Promise<TServerResponse<Blog[]>> {
     const where: Prisma.BlogWhereInput = {};
     if (role !== ERole.ADMIN) {
       where['status'] = EVisibilityStatus.LIVE;
+    }
+    if (role === ERole.ADMIN) {
+      if (queryParams?.visibilityStatus)
+        where['status'] = queryParams.visibilityStatus;
     }
     const data = await this.prismaService.blog.findMany({
       where,

@@ -28,7 +28,14 @@ async function main() {
   //seed products
   const productsExist = await prisma.product.findMany();
   !productsExist.length &&
-    (await prisma.product.createMany({ data: productsSeedData }));
+    productsSeedData.forEach(async ({ medias, ...product }) => {
+      const newProduct = await prisma.product.create({ data: product });
+      medias.forEach(async (media) => {
+        await prisma.productMedia.create({
+          data: { ...media, product: { connect: { id: newProduct.id } } },
+        });
+      });
+    });
 
   //seed user
   const userExist = await prisma.user.findUnique({

@@ -6,7 +6,6 @@ import {
   MinLength,
 } from 'class-validator';
 import { LoginDto } from './login.dto';
-import { Match } from 'src/utils/helpers/decorators.helpers';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SignUpDto extends LoginDto {
@@ -29,18 +28,13 @@ export class SignUpDto extends LoginDto {
   password: string;
 
   @ApiProperty()
-  @IsString()
-  @Match('password')
-  confirmPassword: string;
-
-  @ApiProperty()
   @IsNumberString()
   @IsNotEmpty()
   phoneNumber: string;
 
-  @ApiProperty()
-  @IsString()
-  @MinLength(2)
-  @IsNotEmpty()
-  countryCode: string;
+  // @ApiProperty()
+  // @IsString()
+  // @MinLength(2)
+  // @IsNotEmpty()
+  // countryCode: string;
 }

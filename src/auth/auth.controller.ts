@@ -31,7 +31,7 @@ export class AuthController {
     return { data, message: 'login successful' };
   }
 
-  @Post('/google/auth')
+  @Post('/google-auth')
   async googleAuth(
     @Body() body: GoogleAuthDto,
   ): Promise<TApiResponse<TLoginResponse>> {
