@@ -9,7 +9,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { ApiTags } from '@nestjs/swagger';
+
 import { CreateProductDto } from './Dto/createProduct.dto';
 import { UpdateProductDto } from './Dto/updateProduct.dto';
 import { IAppRequest, TApiResponse } from 'src/@types/app.types';
@@ -18,7 +18,6 @@ import { Public } from 'src/auth/decorators/public.decorators';
 import { Roles } from 'src/auth/decorators/roles.decorators';
 import { ERole } from 'src/@types/enums';
 
-@ApiTags('PRODUCTS')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}

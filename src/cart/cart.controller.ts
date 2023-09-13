@@ -9,14 +9,12 @@ import {
   Req,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { ApiTags } from '@nestjs/swagger';
 import { IAppRequest, TApiResponse } from 'src/@types/app.types';
 import { Cart } from '@prisma/client';
 import { addToCartDto } from './Dto/addToCart.dto';
 import { UpdateQuantityDto } from './Dto/updateQuantity.dto';
 import { CheckoutDto } from './Dto/checkout.dto';
 
-@ApiTags('CART')
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}

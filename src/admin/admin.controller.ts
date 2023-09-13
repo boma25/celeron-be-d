@@ -11,7 +11,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
-import { ApiTags } from '@nestjs/swagger';
 import {
   IAppRequest,
   TApiResponse,
@@ -24,7 +23,6 @@ import { AddAdminDto } from './Dto/addAdmin.dto';
 import { ChangePasswordDto } from './Dto/changePasswordDto';
 
 @Roles([ERole.ADMIN])
-@ApiTags('ADMIN')
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}

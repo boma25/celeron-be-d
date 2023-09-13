@@ -48,11 +48,17 @@ export class UserService {
 
   async changePassword(id: string, data: ChangePasswordDto): Promise<void> {
     const user = await this.findUser({ id });
-    if (authHelpers.verifyPassword(data.password, user.password)) {
+
+    if (
+      !(await authHelpers.verifyPassword(data.currentPassword, user.password))
+    )
+      throw new BadRequestException('invalid password');
+
+    if (await authHelpers.verifyPassword(data.password, user.password))
       throw new BadRequestException(
         'old password cannot be the same as the new password',
       );
-    }
+
     const password = await authHelpers.hashPassword(data.password);
     await this.updateUser({ where: { id }, data: { password } });
   }

@@ -10,7 +10,6 @@ import {
   Req,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { ApiTags } from '@nestjs/swagger';
 import { IAppRequest, TApiResponse, TQueryParams } from 'src/@types/app.types';
 import { Blog } from '@prisma/client';
 import { Public } from 'src/auth/decorators/public.decorators';
@@ -19,7 +18,6 @@ import { ERole } from 'src/@types/enums';
 import { updateBlogDto } from './Dto/updateBlog.dto';
 import { CreateBlogDto } from './Dto/createBlog.dto';
 
-@ApiTags('Blog')
 @Controller('blog')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}

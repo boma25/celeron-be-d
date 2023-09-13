@@ -9,14 +9,12 @@ import {
   Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiTags } from '@nestjs/swagger';
 import { ChangePasswordDto } from './Dto/changePasswordd.dto';
 import { IAppRequest, TApiResponse } from 'src/@types/app.types';
 import { addAddressDto } from './Dto/addAddress.dto';
 import { Address } from '@prisma/client';
 import { updateAddressDto } from './Dto/updateAddress.dto';
 
-@ApiTags('USER')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}

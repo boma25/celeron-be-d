@@ -8,14 +8,12 @@ import {
   Req,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
-import { ApiTags } from '@nestjs/swagger';
 import { IAppRequest, TApiResponse } from 'src/@types/app.types';
 import { EOrderStatus, Order } from '@prisma/client';
 import { UpdateOrderDto } from './Dto/updateOrder.dto';
 import { Roles } from 'src/auth/decorators/roles.decorators';
 import { ERole } from 'src/@types/enums';
 
-@ApiTags('ORDERS')
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}

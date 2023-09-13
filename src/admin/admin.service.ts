@@ -119,11 +119,16 @@ export class AdminService {
 
   async changePassword(id: string, data: ChangePasswordDto): Promise<void> {
     const admin = await this.findAdmin({ id });
-    if (authHelpers.verifyPassword(data.password, admin.password)) {
+    if (
+      !(await authHelpers.verifyPassword(data.currentPassword, admin.password))
+    )
+      throw new BadRequestException('invalid password');
+
+    if (await authHelpers.verifyPassword(data.password, admin.password))
       throw new BadRequestException(
         'old password cannot be the same as the new password',
       );
-    }
+
     const password = await authHelpers.hashPassword(data.password);
     await this.updateProfile(id, { password });
   }
