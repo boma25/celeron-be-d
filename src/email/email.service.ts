@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EEmailEvents } from 'src/@types/enums';
+import { generateInviteEmail } from 'src/utils/emailTemplates/generateInviteHtml';
+import { generateOtpHtml } from 'src/utils/emailTemplates/generateOtpHtml';
+import { generateWelcomeHtml } from 'src/utils/emailTemplates/generateWelcomeHtml';
 import {
   newAdminAddedEmailEvent,
   otpEmailEvent,
   welcomeEmailEvent,
-} from 'src/utils/events';
+} from 'src/utils/events/email.events';
 import { sendMail } from 'src/utils/helpers/mail.helpers';
 
 @Injectable()
@@ -14,8 +17,8 @@ export class EmailService {
   async sendWelcomeMail(payload: welcomeEmailEvent) {
     await sendMail({
       to: [payload.email],
-      subject: 'Account Creation',
-      html: `<h1>Dear ${payload.firstName} Welcome to Celeron</h1>`,
+      subject: 'Welcome to En1',
+      html: generateWelcomeHtml(payload.email),
     });
   }
 
@@ -24,7 +27,12 @@ export class EmailService {
     await sendMail({
       to: [payload.email],
       subject: 'Hear Is Your Otp',
-      html: `<h1>Otp: ${payload.otp}</h1>`,
+      html: generateOtpHtml(
+        `${payload.otp}`,
+        payload.name,
+        payload.email,
+        'www.google.com',
+      ),
     });
   }
 
@@ -33,7 +41,12 @@ export class EmailService {
     await sendMail({
       to: [payload.email],
       subject: 'Reset Password',
-      html: `<h1>Otp: ${payload.otp}</h1>`,
+      html: generateOtpHtml(
+        `${payload.otp}`,
+        payload.name,
+        payload.email,
+        'www.google.com',
+      ),
     });
   }
 
@@ -42,14 +55,12 @@ export class EmailService {
     await sendMail({
       to: [payload.email],
       subject: 'Celeron Admin Invitation',
-      html: `<main> <h1>Dear ${payload.firstName},</h1> 
-
-      you have been invited to celeron as an admin, kindly find your details below
-      <p>email: ${payload.email}</p>
-      <p>password: ${payload.password}</p>
-
-      kindly login to you account and change your password
-      </main>`,
+      html: generateInviteEmail(
+        payload.firstName,
+        payload.email,
+        payload.adminName,
+        'www.google.com',
+      ),
     });
   }
 }

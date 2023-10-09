@@ -45,8 +45,11 @@ export class AdminController {
   }
 
   @Post('/add-admin')
-  async addAdmin(@Body() body: AddAdminDto): TApiResponse<TSerializedUser> {
-    const data = await this.adminService.addAdmin(body);
+  async addAdmin(
+    @Body() body: AddAdminDto,
+    req: IAppRequest,
+  ): TApiResponse<TSerializedUser> {
+    const data = await this.adminService.addAdmin(body, req['userId']);
     return { data, message: 'admin added successfully' };
   }
 

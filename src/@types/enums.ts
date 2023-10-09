@@ -13,3 +13,13 @@ export enum EEmailEvents {
   RESET_PASSWORD = 'RESET_PASSWORD',
   ADMIN_ADDED = 'ADMIN_ADDED',
 }
+
+export enum ESmsEvents {
+  OTP_SMS = 'OTP_SMS',
+}
+
+export enum ETermiiChannel {
+  GENERIC = 'generic',
+  DND = 'dnd',
+  WHATSAPP = 'whatsapp',
+}

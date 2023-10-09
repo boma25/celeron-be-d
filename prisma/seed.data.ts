@@ -34,7 +34,7 @@ export const blogsSeedData: Prisma.BlogCreateManyInput[] = [
 export const productsSeedData = [
   {
     name: 'shoe red',
-    colors: ['bg-RED_01'],
+    colors: ['#212121'],
     sizes: ['M'],
     quantity: 10,
     price: 5000,
@@ -51,7 +51,7 @@ export const productsSeedData = [
   },
   {
     name: 'shoe black',
-    colors: ['bg-RED_01'],
+    colors: ['#212121'],
     sizes: ['M'],
     quantity: 10,
     price: 5000,
@@ -68,7 +68,7 @@ export const productsSeedData = [
   },
   {
     name: 'shoe pink',
-    colors: ['bg-RED_01'],
+    colors: ['#212121'],
     sizes: ['M'],
     quantity: 10,
     price: 5000,
@@ -85,7 +85,7 @@ export const productsSeedData = [
   },
   {
     name: 'shoe white',
-    colors: ['bg-RED_01'],
+    colors: ['#212121'],
     sizes: ['M'],
     quantity: 10,
     price: 5000,

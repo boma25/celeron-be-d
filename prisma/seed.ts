@@ -1,4 +1,4 @@
-import { EAdminType, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import {
   blogsSeedData,
   productsSeedData,

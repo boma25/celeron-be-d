@@ -12,7 +12,10 @@ import { SignUpDto } from './Dto/signup.dto';
 import { JwtService } from '@nestjs/jwt';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EEmailEvents } from 'src/@types/enums';
-import { otpEmailEvent, welcomeEmailEvent } from 'src/utils/events';
+import {
+  otpEmailEvent,
+  welcomeEmailEvent,
+} from 'src/utils/events/email.events';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { ResetPasswordDto } from './Dto/resetPassword.dto';
@@ -107,7 +110,10 @@ export class AuthService {
 
     const otp = authHelpers.generateOtp();
     await this.cacheManager.set(`${email}-otp`, otp, 60 * 1000 * 5);
-    this.eventEmitter.emit(eventType, new otpEmailEvent(email, otp));
+    this.eventEmitter.emit(
+      eventType,
+      new otpEmailEvent(email, otp, user.firstName),
+    );
   }
 
   async requestPasswordReset(email: string): Promise<void> {
@@ -184,7 +190,7 @@ export class AuthService {
         password: 'password',
         emailVerified: true,
       });
-
+      //handle phone number verification\
       return;
     }
     const payload = {

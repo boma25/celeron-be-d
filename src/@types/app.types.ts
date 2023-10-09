@@ -6,6 +6,7 @@ import {
   User,
 } from '@prisma/client';
 import { Request } from 'express';
+import { ETermiiChannel } from './enums';
 
 export type TSerializedUser = Omit<User | Admin, 'password'>;
 
@@ -49,3 +50,27 @@ export interface IAppRequest extends Request {
   role: ERole;
   adminType: EAdminType;
 }
+
+export type TSingleTermiiArg = {
+  sms: string;
+  to: string;
+  channel?: ETermiiChannel;
+  media?: {
+    url: string;
+    caption: string;
+  };
+};
+
+export interface IBulkTermiiArg extends Omit<TSingleTermiiArg, 'to'> {
+  to: string[];
+  type: 'plain';
+}
+
+export type TTermiiBasePayload = {
+  api_key: string;
+  from: string;
+};
+
+export type TSingleTermiiPayload = TSingleTermiiArg & TTermiiBasePayload;
+
+export type TBulkTermiiPayload = IBulkTermiiArg & TTermiiBasePayload;

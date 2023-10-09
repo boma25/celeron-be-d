@@ -4,7 +4,7 @@ import { Admin, Prisma } from '@prisma/client';
 import { TSerializedUser } from 'src/@types/app.types';
 import { EEmailEvents } from 'src/@types/enums';
 import { PrismaService } from 'src/prisma.service';
-import { newAdminAddedEmailEvent } from 'src/utils/events';
+import { newAdminAddedEmailEvent } from 'src/utils/events/email.events';
 import { authHelpers } from 'src/utils/helpers/auth.helpers';
 import { ChangePasswordDto } from './Dto/changePasswordDto';
 
@@ -61,7 +61,9 @@ export class AdminService {
 
   async addAdmin(
     payload: Omit<Prisma.AdminCreateInput, 'password'>,
+    adminId: string,
   ): Promise<TSerializedUser | null> {
+    const admin = await this.findAdmin({ id: adminId });
     const adminExist = await this.findAdmin({ email: payload.email });
     if (adminExist)
       throw new BadRequestException('an admin with this email already exist');
@@ -88,6 +90,7 @@ export class AdminService {
         payload.email,
         payload.firstName,
         passwordText,
+        admin.firstName,
       ),
     );
 
