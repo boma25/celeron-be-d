@@ -76,7 +76,7 @@ CREATE TABLE `Order` (
 -- CreateTable
 CREATE TABLE `Transaction` (
     `id` VARCHAR(191) NOT NULL,
-    `referenece` VARCHAR(191) NOT NULL,
+    `reference` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,
     `status` ENUM('PENDING', 'SUCCESSFUL', 'FAILED') NOT NULL DEFAULT 'PENDING',
     `userId` VARCHAR(191) NOT NULL,
@@ -141,6 +141,7 @@ CREATE TABLE `Product` (
     `id` VARCHAR(191) NOT NULL,
     `manufacturerId` VARCHAR(191) NULL,
     `modelId` VARCHAR(191) NULL,
+    `description` VARCHAR(10000) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `colors` JSON NULL,
     `sizes` JSON NULL,
@@ -149,7 +150,7 @@ CREATE TABLE `Product` (
     `price` DOUBLE NOT NULL,
     `configurable` BOOLEAN NOT NULL DEFAULT false,
     `state` ENUM('ON_SALE', 'COMMING_SOON', 'OUT_OF_STOCK') NULL,
-    `status` ENUM('ACHIEVED', 'DRAFT', 'LIVE') NOT NULL DEFAULT 'DRAFT',
+    `status` ENUM('ACHIEVED', 'DRAFT', 'LIVE', 'SCHEDULED') NOT NULL DEFAULT 'DRAFT',
     `achieved` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -195,8 +196,8 @@ CREATE TABLE `Blog` (
     `id` VARCHAR(191) NOT NULL,
     `coverImage` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
-    `content` VARCHAR(191) NOT NULL,
-    `status` ENUM('ACHIEVED', 'DRAFT', 'LIVE') NOT NULL DEFAULT 'DRAFT',
+    `content` VARCHAR(10000) NOT NULL,
+    `status` ENUM('ACHIEVED', 'DRAFT', 'LIVE', 'SCHEDULED') NOT NULL DEFAULT 'DRAFT',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 

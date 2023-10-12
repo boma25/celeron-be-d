@@ -135,7 +135,7 @@ export class ProductsService {
   }
 
   async findRelatedProducts(id: string): Promise<Product[]> {
-    const product = await this.findProductById(id);
+    /*const product = */ await this.findProductById(id);
     return await this.prismaService.product.findMany({
       where: { status: EVisibilityStatus.LIVE },
       take: 4,

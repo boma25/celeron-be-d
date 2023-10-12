@@ -20,6 +20,7 @@ import { OrdersModule } from './orders/orders.module';
 import { BlogModule } from './blog/blog.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { SmsModule } from './sms/sms.module';
+import { WebhookModule } from './webhook/webhook.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SmsModule } from './sms/sms.module';
     BlogModule,
     TransactionsModule,
     SmsModule,
+    WebhookModule,
   ],
   controllers: [AppController],
   providers: [

@@ -22,7 +22,9 @@ export class CartService {
   async getCart(userId: string): Promise<Cart> {
     const cart = await this.prismaService.cart.findUnique({
       where: { userId },
-      include: { products: true },
+      include: {
+        products: { include: { product: { include: { medias: true } } } },
+      },
     });
     if (!cart) throw new BadRequestException('invalid user id');
     return cart;
@@ -32,6 +34,12 @@ export class CartService {
     const { quantity, color, size } = payload;
     const product = await this.productService.findProductById(payload.product);
     if (!product) throw new BadRequestException('invalid product');
+    if (product.quantity < quantity)
+      throw new BadRequestException('cannot add more than available in stock');
+    if (!product.colors.toString().includes(color))
+      throw new BadRequestException('invalid color');
+    if (!product.sizes.toString().includes(size))
+      throw new BadRequestException('invalid size');
     const cart = await this.getCart(userId);
     const total = cart.total + product.price * quantity;
     return await this.updateCart(userId, {
@@ -111,7 +119,9 @@ export class CartService {
     return await this.prismaService.cart.update({
       where: { userId },
       data,
-      include: { products: true },
+      include: {
+        products: { include: { product: { include: { medias: true } } } },
+      },
     });
   }
 
