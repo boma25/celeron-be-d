@@ -10,11 +10,9 @@ import { updateAddressDto } from './Dto/updateAddress.dto';
 export class UserService {
   constructor(private prismaService: PrismaService) {}
 
-  async findUser(
-    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
-  ): Promise<User | null> {
-    return this.prismaService.user.findUnique({
-      where: userWhereUniqueInput,
+  async findUser(UserWhereInput: Prisma.UserWhereInput): Promise<User | null> {
+    return this.prismaService.user.findFirst({
+      where: UserWhereInput,
       include: { cart: { select: { id: true, products: true, total: true } } },
     });
   }
@@ -22,7 +20,7 @@ export class UserService {
   async createUser(data: Prisma.UserCreateInput): Promise<User | null> {
     const userExist = await this.prismaService.user.findFirst({
       where: {
-        OR: [{ phoneNumber: data.phoneNumber }, { email: data.email }],
+        OR: [{ email: data.email }, { phoneNumber: data.phoneNumber }],
       },
     });
     if (userExist)
@@ -81,9 +79,11 @@ export class UserService {
       where: { address: body.address },
     });
     if (addressExist) throw new BadRequestException('address already exist');
-
+    const addressCount = await this.prismaService.address.count({
+      where: { userId },
+    });
     return await this.prismaService.address.create({
-      data: { ...body, userId },
+      data: { ...body, userId, default: addressCount === 0 },
     });
   }
 

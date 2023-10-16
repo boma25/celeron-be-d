@@ -10,5 +10,6 @@ import { UserModule } from 'src/user/user.module';
   imports: [ProductsModule, OrdersModule, UserModule],
   controllers: [CartController],
   providers: [CartService, PrismaService],
+  exports: [CartService],
 })
 export class CartModule {}

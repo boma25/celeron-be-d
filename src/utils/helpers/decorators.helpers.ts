@@ -85,10 +85,8 @@ export const IsOtp = (length = 6, validationOptions?: ValidationOptions) => {
 
 @ValidatorConstraint({ name: 'IsOtp' })
 class IsOtpConstraint implements ValidatorConstraintInterface {
-  validate(value: number, args: ValidationArguments) {
-    return (
-      typeof value === 'number' && `${value}`.length === args.constraints[0]
-    );
+  validate(value: string, args: ValidationArguments) {
+    return !Number.isNaN(value) && `${value}`.length === args.constraints[0];
   }
 
   defaultMessage(args: ValidationArguments) {

@@ -26,6 +26,8 @@ import { ConfigService } from '@nestjs/config';
 import { AdminService } from 'src/admin/admin.service';
 import { VerifyAccountDto } from './Dto/verifyAccount.dto';
 import { Prisma } from '@prisma/client';
+import { CartService } from 'src/cart/cart.service';
+import { SetPhoneNumberDto } from './Dto/setPhoneNumber.dto';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +35,7 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private adminService: AdminService,
+    private cartService: CartService,
     private jwtService: JwtService,
     private eventEmitter: EventEmitter2,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -88,9 +91,10 @@ export class AuthService {
     };
   }
 
-  async signUp({ ...data }: SignUpDto): Promise<void> {
+  async signUp({ cart, ...data }: SignUpDto): Promise<void> {
     const password = await authHelpers.hashPassword(data.password);
     const user = await this.userService.createUser({ ...data, password });
+
     const { email, firstName } = user;
     this.eventEmitter.emit(
       EEmailEvents.WELCOME_EMAIL,
@@ -146,7 +150,7 @@ export class AuthService {
     if (!user) throw new BadRequestException('invalid email address');
 
     const storedOtp = await this.cacheManager.get(`${email}-otp`);
-    if (!storedOtp || storedOtp !== otp)
+    if (!storedOtp || storedOtp !== parseInt(otp))
       throw new BadRequestException('invalid otp');
 
     await this.cacheManager.set(`${email}-otp`, true, 60 * 1000 * 5);
@@ -175,7 +179,9 @@ export class AuthService {
     await this.cacheManager.del(`${email}-otp`);
   }
 
-  async googleAuth({ token }: GoogleAuthDto): Promise<TLoginResponse> {
+  async googleAuth({
+    token,
+  }: GoogleAuthDto): Promise<TLoginResponse & { email?: string }> {
     const googleUser = await this.oauthClient.verifyIdToken({
       idToken: token,
     });
@@ -190,8 +196,7 @@ export class AuthService {
         password: 'password',
         emailVerified: true,
       });
-      //handle phone number verification\
-      return;
+      return { email: user.email } as TLoginResponse & { email?: string };
     }
     const payload = {
       email: user.email,
@@ -203,5 +208,33 @@ export class AuthService {
       authToken: await this.jwtService.signAsync(payload),
       user: authHelpers.serializeUser(user),
     };
+  }
+
+  async setPhoneNumber({
+    phoneNumber,
+    countryCode,
+    email,
+  }: SetPhoneNumberDto): Promise<void> {
+    const userExist = await this.userService.findUser({
+      AND: [{ phoneNumber }, { email: { not: { equals: email } } }],
+    });
+
+    if (userExist) throw new BadRequestException('phone number already exist');
+
+    const user = await this.userService.findUser({
+      AND: [
+        { email: { equals: email } },
+        { emailVerified: true },
+        { phoneNumberVerified: false },
+      ],
+    });
+    if (!user) throw new BadRequestException('invalid email address');
+
+    await this.sendOtp(user.email);
+
+    await this.userService.updateUser({
+      where: { id: user.id },
+      data: { phoneNumber, countryCode },
+    });
   }
 }

@@ -1,6 +1,7 @@
 import { hash, compare } from 'bcrypt';
 import { Admin, User } from '@prisma/client';
 import { TSerializedUser } from 'src/@types/app.types';
+import { randomBytes } from 'crypto';
 
 const serializeUser = (user: User | Admin): TSerializedUser => {
   //eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -20,7 +21,10 @@ const verifyPassword = async (
 };
 
 const generateOtp = (): number => {
-  return Math.floor(Math.random() * 900000);
+  const randBytes = randomBytes(3);
+  const randomValue = parseInt(randBytes.toString('hex'), 16);
+  const sixDigitString = String(randomValue).slice(0, 6);
+  return parseInt(sixDigitString);
 };
 
 const generateAdminPassword = async (): Promise<{

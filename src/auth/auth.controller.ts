@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public.decorators';
 import { TApiResponse, TLoginResponse } from 'src/@types/app.types';
@@ -9,6 +9,7 @@ import { ResetPasswordDto } from './Dto/resetPassword.dto';
 import { VerifyOtpDto } from './Dto/verifyOtp.dto';
 import { GoogleAuthDto } from './Dto/googleAuth.dto';
 import { VerifyAccountDto } from './Dto/verifyAccount.dto';
+import { SetPhoneNumberDto } from './Dto/setPhoneNumber.dto';
 
 @Public()
 @Controller('auth')
@@ -32,9 +33,14 @@ export class AuthController {
   @Post('/google-auth')
   async googleAuth(
     @Body() body: GoogleAuthDto,
-  ): Promise<TApiResponse<TLoginResponse>> {
+  ): Promise<TApiResponse<TLoginResponse & { email?: string }>> {
     const data = await this.authService.googleAuth(body);
-    return { data, message: 'login successful' };
+    return {
+      data,
+      message: data?.authToken
+        ? 'login successful'
+        : 'kindly verify your phone number',
+    };
   }
 
   @Post('/signup')
@@ -85,6 +91,14 @@ export class AuthController {
     await this.authService.verifyAccount(body);
     return {
       message: 'verification successful',
+    };
+  }
+
+  @Put('/update-phone-number')
+  async setPhoneNumber(@Body() body: SetPhoneNumberDto): Promise<TApiResponse> {
+    await this.authService.setPhoneNumber(body);
+    return {
+      message: 'an otp sent to your phone number',
     };
   }
 }
