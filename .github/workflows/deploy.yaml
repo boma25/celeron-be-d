@@ -31,5 +31,6 @@ jobs:
             npm install 
             npm run migration:run 
             echo "migration successful"
+            export NODE_OPTIONS="--max-old-space-size=2048"
             npm run build 
             echo "deployment successful"
