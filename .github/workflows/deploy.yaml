@@ -22,12 +22,6 @@ jobs:
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
 
-      - name: Install Yarn
-        run: npm install -g yarn
-
-      - name: Install pm2
-        run: npm install -g pm2
-
       - name: Executing remote ssh commands using ssh key
         uses: appleboy/ssh-action@master
         with:
@@ -37,8 +31,7 @@ jobs:
           script: |
             cd celeron-backend
             git pull
-            yarn install
-            yarn migration:run
-            yarn build
-            pm2 restart server
+            npm install
+            mpm run migration:run
+            npm run build
             echo "deployment successful"
