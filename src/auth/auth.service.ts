@@ -91,7 +91,7 @@ export class AuthService {
     };
   }
 
-  async signUp({ cart, ...data }: SignUpDto): Promise<void> {
+  async signUp(data: SignUpDto): Promise<void> {
     const password = await authHelpers.hashPassword(data.password);
     const user = await this.userService.createUser({ ...data, password });
 

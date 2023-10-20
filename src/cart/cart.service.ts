@@ -4,11 +4,9 @@ import { PrismaService } from 'src/prisma.service';
 import { addToCartDto } from './Dto/addToCart.dto';
 import { ProductsService } from 'src/products/products.service';
 import { UpdateQuantityDto } from './Dto/updateQuantity.dto';
-import { CheckoutDto } from './Dto/checkout.dto';
 import { UserService } from 'src/user/user.service';
-import { addAddressDto } from 'src/user/Dto/addAddress.dto';
-import { validateDto } from 'src/utils/helpers/general.helpers';
 import { OrdersService } from 'src/orders/orders.service';
+import { setCartDto } from './Dto/setCart.dto';
 
 @Injectable()
 export class CartService {
@@ -32,16 +30,29 @@ export class CartService {
 
   async addItemToCart(userId: string, payload: addToCartDto): Promise<Cart> {
     const { quantity, color, size } = payload;
-    const product = await this.productService.findProductById(payload.product);
+    const product = await this.productService.findProductById(
+      payload.productId,
+    );
     if (!product) throw new BadRequestException('invalid product');
     if (product.quantity < quantity)
       throw new BadRequestException('cannot add more than available in stock');
+    const cart = await this.getCart(userId);
+    const productInCart = await this.prismaService.orderProduct.findFirst({
+      where: { productId: product.id, cartId: cart.id },
+    });
+    if (productInCart)
+      return await this.updateQuantity(userId, {
+        productId: product.id,
+        quantity,
+      });
+
     if (!product.colors.toString().includes(color))
       throw new BadRequestException('invalid color');
     if (!product.sizes.toString().includes(size))
       throw new BadRequestException('invalid size');
-    const cart = await this.getCart(userId);
+
     const total = cart.total + product.price * quantity;
+
     return await this.updateCart(userId, {
       total,
       products: {
@@ -125,32 +136,14 @@ export class CartService {
     });
   }
 
-  async checkout(userId: string, body: CheckoutDto): Promise<void> {
-    const { addressId, ...newAddressPayload } = body;
-    let address: string = addressId;
-    if (!addressId && !Object.keys(newAddressPayload).length)
-      throw new BadRequestException(
-        'addressId or newAddressPayload is required',
-      );
+  async checkout(userId: string, addressId: string): Promise<void> {
+    const addressExist = await this.userService.findAddressById(
+      addressId,
+      userId,
+    );
 
-    //verify addressId is valid
-    if (addressId) {
-      const addressExist = await this.userService.findAddressById(
-        addressId,
-        userId,
-      );
-      address = addressExist.id;
-    }
-    //if no addressId, verify and create new address
-    if (!addressId && newAddressPayload) {
-      const addressObj = new addAddressDto();
-      for (const key of Object.keys(newAddressPayload)) {
-        addressObj[key] = newAddressPayload[key];
-      }
-      await validateDto(addressObj);
-      const newAddress = await this.userService.addAddress(userId, addressObj);
-      address = newAddress.id;
-    }
+    if (!addressExist) throw new BadRequestException('invalid address id');
+
     const cart = await this.getCart(userId);
     const orderProducts = await this.prismaService.orderProduct.findMany({
       where: { cartId: cart.id },
@@ -160,13 +153,14 @@ export class CartService {
       data: {
         reference: '1234567890',
         description: 'payment for order',
+        amount: cart.total,
         userId,
       },
     });
     const order = await this.orderService.createOrder({
       total: cart.total,
       User: { connect: { id: userId } },
-      deliveryAddress: { connect: { id: address } },
+      deliveryAddress: { connect: { id: addressId } },
       transaction: { connect: { id: transaction.id } },
       orderNumber: 1,
       shippingFee: 5000,
@@ -176,5 +170,25 @@ export class CartService {
       data: { orderId: order.id, cartId: null },
     });
     await this.emptyCart(userId);
+  }
+
+  async setCart(userId: string, { products }: setCartDto): Promise<Cart> {
+    if (products.length > 0) {
+      await this.updateCart(userId, { total: 0, products: { deleteMany: {} } });
+      for (const { productId, size, color, quantity } of products) {
+        const productExist = await this.productService.findProductById(
+          productId,
+        );
+        if (!productExist || productExist.quantity === 0) continue;
+        await this.addItemToCart(userId, {
+          productId,
+          size,
+          color,
+          quantity:
+            quantity > productExist.quantity ? productExist.quantity : quantity,
+        });
+      }
+    }
+    return await this.getCart(userId);
   }
 }

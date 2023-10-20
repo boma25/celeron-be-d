@@ -1,25 +1,35 @@
 import {
+  IsArray,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
+  Min,
+  ValidateNested,
 } from 'class-validator';
 
-export class addToCartDto {
+export class ProductType {
   @IsUUID()
   productId: string;
 
   @IsNumber()
+  @Min(1, { message: 'Quantity must be a positive number' })
   quantity: number;
 
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
+  @IsNotEmpty()
   color: string;
 
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
+  @IsNotEmpty()
   size: string;
+}
+
+export class setCartDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  products: ProductType[];
 }

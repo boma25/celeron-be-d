@@ -13,7 +13,7 @@ import { IAppRequest, TApiResponse } from 'src/@types/app.types';
 import { Cart } from '@prisma/client';
 import { addToCartDto } from './Dto/addToCart.dto';
 import { UpdateQuantityDto } from './Dto/updateQuantity.dto';
-import { CheckoutDto } from './Dto/checkout.dto';
+import { setCartDto } from './Dto/setCart.dto';
 
 @Controller('cart')
 export class CartController {
@@ -55,12 +55,21 @@ export class CartController {
     return { data, message: 'cart updated' };
   }
 
-  @Post('checkout')
+  @Post('checkout/:addressId')
   async checkout(
     @Req() req: IAppRequest,
-    @Body() body: CheckoutDto,
+    @Param('addressId', ParseUUIDPipe) addressId: string,
   ): TApiResponse<Cart> {
-    await this.cartService.checkout(req['userId'], body);
-    return { message: 'checkout successful' };
+    await this.cartService.checkout(req['userId'], addressId);
+    return { message: 'kindly proceed to payment' };
+  }
+
+  @Put('/set')
+  async setCart(
+    @Req() req: IAppRequest,
+    @Body() body: setCartDto,
+  ): TApiResponse<Cart> {
+    const data = await this.cartService.setCart(req['userId'], body);
+    return { data, message: 'cart set' };
   }
 }
