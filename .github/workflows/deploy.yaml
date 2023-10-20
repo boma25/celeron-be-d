@@ -12,20 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the files
-        uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 18 # You can specify your desired Node.js version here
-
-      - name: Install Yarn
-        run: npm install -g yarn
-
       - name: Deploy to EC2
         uses: easingthemes/ssh-deploy@main
-        env:
+        with:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
@@ -41,5 +30,6 @@ jobs:
             git pull
             yarn install 
             yarn migration:run 
+            echo "migration successful"
             yarn build 
             echo "deployment successful"
