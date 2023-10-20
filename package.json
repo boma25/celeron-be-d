@@ -19,7 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "migration:generate": "prisma migrate dev --create-only",
-    "migration:run": "prisma migrate deploy",
+    "migration:run": "prisma migrate deploy && prisma generate",
     "migration:reset": "prisma migrate reset",
     "migration:generate:down": "prisma migrate diff --from-schema-datamodel prisma/schema.prisma --to-schema-datasource prisma/schema.prisma  --script > down.sql",
     "db:seed": "prisma db seed"
