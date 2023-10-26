@@ -3,13 +3,16 @@ import { ERole, Order, Prisma } from '@prisma/client';
 import { TServerResponse } from 'src/@types/app.types';
 import { PrismaService } from 'src/prisma.service';
 import { UpdateOrderDto } from './Dto/updateOrder.dto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class OrdersService {
   constructor(private prismaService: PrismaService) {}
 
-  async createOrder(data: Prisma.OrderCreateInput): Promise<Order> {
-    const orderNumber = Math.random() * 1000000;
+  async createOrder(
+    data: Omit<Prisma.OrderCreateInput, 'orderNumber'>,
+  ): Promise<Order> {
+    const orderNumber = await this.generateOrderNumber();
     return await this.prismaService.order.create({
       data: { ...data, orderNumber },
     });
@@ -66,5 +69,15 @@ export class OrdersService {
       data,
       include: { products: true },
     });
+  }
+
+  private async generateOrderNumber(): Promise<number> {
+    const randBytes = randomBytes(3);
+    const orderNumber = parseInt(randBytes.toString('hex'), 16);
+    const refExist = await this.prismaService.order.findUnique({
+      where: { orderNumber },
+    });
+    if (refExist) return this.generateOrderNumber();
+    return orderNumber;
   }
 }

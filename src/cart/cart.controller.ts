@@ -14,6 +14,7 @@ import { Cart } from '@prisma/client';
 import { addToCartDto } from './Dto/addToCart.dto';
 import { UpdateQuantityDto } from './Dto/updateQuantity.dto';
 import { setCartDto } from './Dto/setCart.dto';
+import { CheckoutDto } from './Dto/checkout.dto';
 
 @Controller('cart')
 export class CartController {
@@ -55,12 +56,12 @@ export class CartController {
     return { data, message: 'cart updated' };
   }
 
-  @Post('checkout/:addressId')
+  @Post('checkout')
   async checkout(
     @Req() req: IAppRequest,
-    @Param('addressId', ParseUUIDPipe) addressId: string,
+    @Body() body: CheckoutDto,
   ): TApiResponse<Cart> {
-    await this.cartService.checkout(req['userId'], addressId);
+    await this.cartService.checkout(req['userId'], body);
     return { message: 'kindly proceed to payment' };
   }
 

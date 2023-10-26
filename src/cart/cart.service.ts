@@ -7,6 +7,8 @@ import { UpdateQuantityDto } from './Dto/updateQuantity.dto';
 import { UserService } from 'src/user/user.service';
 import { OrdersService } from 'src/orders/orders.service';
 import { setCartDto } from './Dto/setCart.dto';
+import { CheckoutDto } from './Dto/checkout.dto';
+import { TransactionsService } from 'src/transactions/transactions.service';
 
 @Injectable()
 export class CartService {
@@ -15,6 +17,7 @@ export class CartService {
     private productService: ProductsService,
     private userService: UserService,
     private orderService: OrdersService,
+    private transactionService: TransactionsService,
   ) {}
 
   async getCart(userId: string): Promise<Cart> {
@@ -136,9 +139,9 @@ export class CartService {
     });
   }
 
-  async checkout(userId: string, addressId: string): Promise<void> {
+  async checkout(userId: string, payload: CheckoutDto): Promise<void> {
     const addressExist = await this.userService.findAddressById(
-      addressId,
+      payload.addressId,
       userId,
     );
 
@@ -149,22 +152,20 @@ export class CartService {
       where: { cartId: cart.id },
     });
     if (!orderProducts.length) throw new BadRequestException('cart is empty');
-    const transaction = await this.prismaService.transaction.create({
-      data: {
-        reference: '1234567890',
-        description: 'payment for order',
-        amount: cart.total,
-        userId,
-      },
-    });
+
+    const transaction =
+      await this.transactionService.findTransactionByReference(
+        payload.reference,
+      );
+
     const order = await this.orderService.createOrder({
       total: cart.total,
       User: { connect: { id: userId } },
-      deliveryAddress: { connect: { id: addressId } },
+      deliveryAddress: { connect: { id: payload.addressId } },
       transaction: { connect: { id: transaction.id } },
-      orderNumber: 1,
       shippingFee: 5000,
     });
+
     await this.prismaService.orderProduct.updateMany({
       where: { cartId: cart.id },
       data: { orderId: order.id, cartId: null },

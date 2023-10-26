@@ -105,7 +105,7 @@ model OrderProduct {
 
 model Order {
   id                   String         @id @unique @default(uuid())
-  orderNumber          Int
+  orderNumber          Int            @unique
   status               EOrderStatus   @default(PROCESSING)
   User                 User           @relation(fields: [userId], references: [id])
   userId               String
@@ -123,7 +123,7 @@ model Order {
 
 model Transaction {
   id          String             @id @unique @default(uuid())
-  reference   String
+  reference   String             @unique
   description String
   amount      Float
   order       Order?
