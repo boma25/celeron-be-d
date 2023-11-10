@@ -27,9 +27,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd celeron-backend
-            git pull
-            yarn 
-            yarn migration:run 
+            sudo git pull
+            sudo npm install 
+            sudo npm run migration:run 
             echo "migration successful"
-            yarn build 
+            sudo npm run build 
             echo "deployment successful"
