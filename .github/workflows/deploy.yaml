@@ -28,9 +28,8 @@ jobs:
           script: |
             cd celeron-backend
             git pull
-            npm install 
-            npm run migration:run 
+            yarn 
+            yarn migration:run 
             echo "migration successful"
-            export NODE_OPTIONS="--max-old-space-size=2048"
-            npm run build 
+            yarn build 
             echo "deployment successful"
