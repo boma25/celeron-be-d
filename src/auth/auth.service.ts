@@ -193,7 +193,9 @@ export class AuthService {
         email: info.email,
         lastName: info.family_name,
         firstName: info.given_name,
-        password: 'password',
+        password: await authHelpers.hashPassword(
+          authHelpers.generateOtp().toString(),
+        ),
         emailVerified: true,
       });
       return { email: user.email } as TLoginResponse & { email?: string };

@@ -108,4 +108,21 @@ export class UserService {
       data: body,
     });
   }
+
+  async setDefaultAddress(id: string, userId: string): Promise<void> {
+    const addressExist = await this.prismaService.address.findUnique({
+      where: { id },
+    });
+    if (!addressExist) throw new BadRequestException('invalid address id');
+
+    await this.prismaService.address.updateMany({
+      where: { userId },
+      data: { default: false },
+    });
+
+    await this.prismaService.address.update({
+      where: { id },
+      data: { default: true },
+    });
+  }
 }

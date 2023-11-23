@@ -49,10 +49,18 @@ export class UserController {
   @Put('/update-address/:addressId')
   async updateAddress(
     @Body() body: updateAddressDto,
-    @Req() req: IAppRequest,
     @Param('addressId', ParseUUIDPipe) addressId: string,
   ): TApiResponse<Address> {
     const data = await this.userService.updateAddress(addressId, body);
     return { data, message: 'address updated' };
+  }
+
+  @Put('/set-default-address/:addressId')
+  async setDefaultAddress(
+    @Param('addressId', ParseUUIDPipe) addressId: string,
+    @Req() req: IAppRequest,
+  ): TApiResponse {
+    await this.userService.setDefaultAddress(addressId, req['userId']);
+    return { message: 'default address set' };
   }
 }
