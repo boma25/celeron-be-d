@@ -28,10 +28,10 @@ jobs:
           script: |
             cd /var/www/celeron-backend
             sudo git pull
-            yarn
-            yarn migration:run 
+            sudo yarn
+            sudo yarn migration:run 
             echo "migration successful"
-            yarn build
+            sudo yarn build
             echo "build successful"
-            pm2 restart be-server --update-env
+            sudo pm2 restart be-server --update-env
             echo "deployment successful"
