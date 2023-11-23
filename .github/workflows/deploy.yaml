@@ -28,8 +28,10 @@ jobs:
           script: |
             cd /var/www/celeron-backend
             sudo git pull
-            npm install 
-            npm run migration:run 
+            yarn
+            yarn migration:run 
             echo "migration successful"
-            npm run build 
+            yarn build
+            echo "build successful"
+            pm2 restart be-server --update-env
             echo "deployment successful"
