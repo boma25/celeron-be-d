@@ -139,7 +139,7 @@ export class CartService {
     });
   }
 
-  async checkout(userId: string, payload: CheckoutDto): Promise<void> {
+  async checkout(userId: string, payload: CheckoutDto): Promise<Cart> {
     const addressExist = await this.userService.findAddressById(
       payload.addressId,
       userId,
@@ -170,7 +170,7 @@ export class CartService {
       where: { cartId: cart.id },
       data: { orderId: order.id, cartId: null },
     });
-    await this.emptyCart(userId);
+    return await this.emptyCart(userId);
   }
 
   async setCart(userId: string, { products }: setCartDto): Promise<Cart> {

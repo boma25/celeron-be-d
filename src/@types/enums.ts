@@ -23,3 +23,7 @@ export enum ETermiiChannel {
   DND = 'dnd',
   WHATSAPP = 'whatsapp',
 }
+
+export enum EPaystackEvents {
+  CHARGE_SUCCESS = 'charge.success',
+}

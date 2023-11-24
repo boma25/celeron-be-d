@@ -61,8 +61,8 @@ export class CartController {
     @Req() req: IAppRequest,
     @Body() body: CheckoutDto,
   ): TApiResponse<Cart> {
-    await this.cartService.checkout(req['userId'], body);
-    return { message: 'kindly proceed to payment' };
+    const data = await this.cartService.checkout(req['userId'], body);
+    return { data, message: 'your transaction is being processed' };
   }
 
   @Put('/set')
