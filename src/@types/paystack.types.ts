@@ -1,4 +1,4 @@
-import { EPaystackEvents } from './enums';
+import { EPaystackChannel, EPaystackEvents } from './enums';
 
 export type TPaystackLogHistory = {
   type: string;
@@ -24,13 +24,10 @@ export type TPaystackAuthorization = {
   last4: string;
   exp_month: string;
   exp_year: string;
-  channel: string;
   card_type: string;
   bank: string;
   country_code: string;
   brand: string;
-  reusable: boolean;
-  signature: string;
   account_name: string | null;
 };
 
@@ -55,7 +52,7 @@ export type TPaystackTransaction = {
   gateway_response: string;
   paid_at: string;
   created_at: string;
-  channel: string;
+  channel: EPaystackChannel;
   currency: string;
   ip_address: string;
   metadata: object;

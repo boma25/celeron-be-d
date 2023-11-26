@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
-import { User, Prisma, Address } from '@prisma/client';
+import { User, Prisma, Address, Card } from '@prisma/client';
 import { ChangePasswordDto } from './Dto/changePasswordd.dto';
 import { authHelpers } from 'src/utils/helpers/auth.helpers';
 import { addAddressDto } from './Dto/addAddress.dto';
 import { updateAddressDto } from './Dto/updateAddress.dto';
+import { TPaystackAuthorization } from 'src/@types/paystack.types';
 
 @Injectable()
 export class UserService {
@@ -124,5 +125,52 @@ export class UserService {
       where: { id },
       data: { default: true },
     });
+  }
+
+  async cards(userId: string): Promise<Card[]> {
+    return await this.prismaService.card.findMany({
+      where: { userId },
+    });
+  }
+
+  async addCard(userId: string, card: TPaystackAuthorization) {
+    const cardExist = await this.prismaService.card.findFirst({
+      where: { ...card, userId },
+    });
+    if (cardExist) return;
+    const cards = await this.cards(userId);
+    return await this.prismaService.card.create({
+      data: { ...card, userId, default: cards.length === 0 },
+    });
+  }
+
+  async setDefaultCard(id: string, userId: string): Promise<void> {
+    const cardExist = await this.prismaService.card.findUnique({
+      where: { id, userId },
+    });
+    if (!cardExist) throw new BadRequestException('invalid card id');
+
+    await this.prismaService.card.updateMany({
+      where: { userId, default: true },
+      data: { default: false },
+    });
+
+    await this.prismaService.card.update({
+      where: { id },
+      data: { default: true },
+    });
+  }
+
+  async deleteCard(id: string, userId: string): Promise<void> {
+    const cardExist = await this.prismaService.card.findUnique({
+      where: { id, userId },
+    });
+    if (!cardExist) throw new BadRequestException('invalid card id');
+
+    await this.prismaService.card.delete({ where: { id } });
+    if (cardExist.default) {
+      const cards = await this.cards(userId);
+      if (cards.length > 0) await this.setDefaultCard(cards[0].id, userId);
+    }
   }
 }

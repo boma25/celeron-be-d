@@ -67,6 +67,7 @@ model User {
   emailVerified       Boolean       @default(false)
   phoneNumberVerified Boolean       @default(false)
   transactions        Transaction[]
+  cards               Card[]
   cart                Cart?
   role                ERole         @default(USER)
   createdAt           DateTime      @default(now())
@@ -91,7 +92,7 @@ model Address {
 model OrderProduct {
   id        String   @id @unique @default(uuid())
   product   Product  @relation(fields: [productId], references: [id])
-  productId String   @unique
+  productId String
   quantity  Int
   color     String?
   size      String?
@@ -104,21 +105,22 @@ model OrderProduct {
 }
 
 model Order {
-  id                   String         @id @unique @default(uuid())
-  orderNumber          Int            @unique
-  status               EOrderStatus   @default(PROCESSING)
-  User                 User           @relation(fields: [userId], references: [id])
+  id                   String            @id @unique @default(uuid())
+  orderNumber          Int               @unique
+  status               EOrderStatus      @default(PROCESSING)
+  User                 User              @relation(fields: [userId], references: [id])
   userId               String
   total                Float
-  deliveryAddress      Address        @relation(fields: [addressId], references: [id])
+  deliveryAddress      Address           @relation(fields: [addressId], references: [id])
   addressId            String
-  transaction          Transaction    @relation(fields: [transactionId], references: [id])
-  transactionId        String         @unique()
+  transaction          Transaction       @relation(fields: [transactionId], references: [id])
+  transactionId        String            @unique()
   expectedDeliveryDate DateTime?
-  shippingFee          Int            @default(0)
+  shippingFee          Int               @default(0)
+  shipmentHistory      ShipmentHistory[]
   products             OrderProduct[]
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
 }
 
 model Transaction {
@@ -130,6 +132,8 @@ model Transaction {
   status      ETransactionStatus @default(PENDING)
   User        User               @relation(fields: [userId], references: [id])
   userId      String
+  Card        Card?              @relation(fields: [cardId], references: [id])
+  cardId      String?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 }
@@ -180,7 +184,7 @@ model Product {
   modelId        String?
   categories     ProductCategory[]
   medias         ProductMedia[]
-  orderProduct   OrderProduct?
+  orderProduct   OrderProduct[]
   description    String            @db.VarChar(10000)
   name           String            @unique
   colors         Json?
@@ -227,4 +231,33 @@ model Blog {
   status     EVisibilityStatus @default(DRAFT)
   createdAt  DateTime          @default(now())
   updatedAt  DateTime          @updatedAt
+}
+
+model Card {
+  id                 String        @id @unique @default(uuid())
+  account_name       String
+  authorization_code String
+  bin                String
+  last4              String
+  exp_month          String
+  exp_year           String
+  card_type          String
+  bank               String
+  country_code       String
+  brand              String
+  transactions       Transaction[]
+  default            Boolean       @default(false)
+  User               User          @relation(fields: [userId], references: [id])
+  userId             String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+}
+
+model ShipmentHistory {
+  id          String   @id @unique @default(uuid())
+  description String
+  order       Order    @relation(fields: [orderId], references: [id])
+  orderId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

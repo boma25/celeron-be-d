@@ -27,3 +27,6 @@ export enum ETermiiChannel {
 export enum EPaystackEvents {
   CHARGE_SUCCESS = 'charge.success',
 }
+export enum EPaystackChannel {
+  CARD = 'card',
+}

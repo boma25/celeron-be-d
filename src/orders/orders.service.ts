@@ -26,7 +26,22 @@ export class OrdersService {
 
     const order = await this.prismaService.order.findUnique({
       where,
-      include: { products: true },
+      include: {
+        shipmentHistory: true,
+        deliveryAddress: true,
+        transaction: {
+          select: {
+            Card: { select: { last4: true, card_type: true } },
+          },
+        },
+        products: {
+          include: {
+            product: {
+              select: { price: true, medias: true },
+            },
+          },
+        },
+      },
     });
 
     if (!order) throw new BadRequestException('invalid order id');
@@ -45,7 +60,15 @@ export class OrdersService {
 
     const data = await this.prismaService.order.findMany({
       where,
-      include: { products: true },
+      include: {
+        products: {
+          include: {
+            product: {
+              select: { price: true, medias: true },
+            },
+          },
+        },
+      },
     });
     return { data };
   }

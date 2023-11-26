@@ -74,8 +74,12 @@ export class CartService {
     const product = await this.productService.findProductById(productId);
     if (!product) throw new BadRequestException('invalid product');
     const cart = await this.getCart(userId);
-    const orderProduct = await this.prismaService.orderProduct.delete({
+    const order = await this.prismaService.orderProduct.findFirst({
       where: { cartId: cart.id, productId },
+    });
+    if (!order) throw new BadRequestException('invalid order product id');
+    const orderProduct = await this.prismaService.orderProduct.delete({
+      where: { id: order.id },
     });
     const total = cart.total - orderProduct.quantity * product.price;
     return await this.updateCart(userId, {
